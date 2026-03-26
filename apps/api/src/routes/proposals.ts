@@ -171,4 +171,45 @@ router.put(
   },
 );
 
+// Public: view proposal via share token (no auth required)
+router.get('/share/:token', async (req: Request<{ token: string }>, res: Response) => {
+  try {
+    const proposal = await prisma.proposal.findUnique({
+      where: { shareToken: req.params.token },
+      include: {
+        estimate: {
+          include: {
+            items: { orderBy: { sortOrder: 'asc' } },
+            project: {
+              include: {
+                user: {
+                  select: { companyName: true, email: true, phone: true, logo: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      res.status(404).json({ error: 'Proposal not found' });
+      return;
+    }
+
+    // Track view
+    if (!proposal.viewedAt) {
+      await prisma.proposal.update({
+        where: { id: proposal.id },
+        data: { viewedAt: new Date(), status: proposal.status === 'sent' ? 'viewed' : proposal.status },
+      });
+    }
+
+    res.json({ proposal });
+  } catch (error) {
+    console.error('Public proposal error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

@@ -128,6 +128,18 @@ export default function ProposalPage() {
             <p className="text-muted-foreground">Based on estimate: {estimate.name}</p>
           </div>
           <div className="flex items-center gap-2">
+            {proposal.shareToken && (
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/share/${proposal.shareToken}`;
+                  navigator.clipboard.writeText(url);
+                  alert('Share link copied to clipboard!');
+                }}
+                className="rounded-md border px-3 py-1 text-xs hover:bg-accent"
+              >
+                Copy Share Link
+              </button>
+            )}
             <select
               value={proposal.status}
               onChange={(e) => updateStatus(e.target.value)}

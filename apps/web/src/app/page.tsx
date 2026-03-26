@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { APP_NAME } from '@contractorpro/shared';
 
 export default function Home() {
@@ -7,6 +8,20 @@ export default function Home() {
       <p className="mt-4 text-lg text-muted-foreground">
         All-in-one app for contractors: estimates, proposals, project management, invoicing.
       </p>
+      <div className="mt-8 flex gap-4">
+        <Link
+          href="/dashboard"
+          className="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Go to Dashboard
+        </Link>
+        <Link
+          href="/login"
+          className="rounded-md border px-6 py-3 text-sm font-medium hover:bg-accent"
+        >
+          Sign In
+        </Link>
+      </div>
     </main>
   );
 }

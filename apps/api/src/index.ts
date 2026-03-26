@@ -8,6 +8,7 @@ import estimateRoutes from './routes/estimates.js';
 import templateRoutes from './routes/templates.js';
 import proposalRoutes from './routes/proposals.js';
 import dashboardRoutes from './routes/dashboard.js';
+import profileRoutes from './routes/profile.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -26,6 +27,7 @@ app.use('/api/projects/:projectId/estimates', estimateRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api', proposalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.listen(PORT, () => {
   console.log(`${APP_NAME} API running on http://localhost:${PORT}`);

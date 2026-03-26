@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import { calcEstimate } from '@contractorpro/shared';
 
 interface EstimateItem {
   id: string;
@@ -165,25 +166,41 @@ export default function ProjectDetailPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {project.estimates.map((estimate) => (
-              <Link
-                key={estimate.id}
-                href={`/projects/${project.id}/estimates/${estimate.id}`}
-                className="block rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{estimate.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {estimate.items.length} item{estimate.items.length !== 1 ? 's' : ''}
-                    </p>
+            {project.estimates.map((estimate) => {
+              const calc = calcEstimate(estimate.items, {
+                overheadRate: estimate.overheadRate,
+                marginRate: estimate.marginRate,
+                taxRate: estimate.taxRate,
+              });
+              return (
+                <div key={estimate.id} className="rounded-lg border bg-card p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <Link href={`/projects/${project.id}/estimates/${estimate.id}`} className="flex-1 hover:underline">
+                      <h3 className="font-medium">{estimate.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {estimate.items.length} item{estimate.items.length !== 1 ? 's' : ''} &middot; ${calc.grandTotal.toFixed(2)}
+                      </p>
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[estimate.status] || ''}`}>
+                        {estimate.status}
+                      </span>
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          const res = await apiFetch(`/api/estimates/${estimate.id}/proposal`, { method: 'POST' });
+                          const data = await res.json();
+                          if (data.proposal) router.push(`/proposals/${data.proposal.id}`);
+                        }}
+                        className="rounded-md border px-3 py-1 text-xs hover:bg-accent"
+                      >
+                        Proposal
+                      </button>
+                    </div>
                   </div>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[estimate.status] || ''}`}>
-                    {estimate.status}
-                  </span>
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

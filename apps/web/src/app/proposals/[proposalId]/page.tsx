@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
-import { calcEstimate } from '@contractorpro/shared';
+import { calcEstimate, calcLineItem } from '@contractorpro/shared';
+import { ModernTemplate, ClassicTemplate } from '@/components/templates';
+import type { ProposalData } from '@/components/templates';
 
 interface Proposal {
   id: string;
@@ -54,6 +56,8 @@ export default function ProposalPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState({ scopeOfWork: '', timeline: '', paymentTerms: '' });
+  const [preview, setPreview] = useState(false);
+  const [template, setTemplate] = useState<'modern' | 'classic'>('modern');
 
   useEffect(() => {
     apiFetch(`/api/proposals/${params.proposalId}`)
@@ -219,7 +223,23 @@ export default function ProposalPage() {
           <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${calc.grandTotal.toFixed(2)}</span></div>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <select
+              value={template}
+              onChange={(e) => setTemplate(e.target.value as 'modern' | 'classic')}
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="modern">Modern Template</option>
+              <option value="classic">Classic Template</option>
+            </select>
+            <button
+              onClick={() => setPreview(!preview)}
+              className={`rounded-md border px-4 py-2 text-sm font-medium ${preview ? 'bg-accent' : 'hover:bg-accent'}`}
+            >
+              {preview ? 'Edit Mode' : 'Preview'}
+            </button>
+          </div>
           <button
             onClick={saveProposal}
             disabled={saving}
@@ -228,6 +248,46 @@ export default function ProposalPage() {
             {saving ? 'Saving...' : 'Save Proposal'}
           </button>
         </div>
+
+        {/* Template Preview */}
+        {preview && (() => {
+          const templateData: ProposalData = {
+            companyName: project.user.companyName,
+            companyEmail: project.user.email,
+            companyPhone: project.user.phone,
+            clientName: project.clientName,
+            clientEmail: project.clientEmail,
+            clientAddress: project.address,
+            projectName: project.name,
+            scopeOfWork: editing.scopeOfWork,
+            timeline: editing.timeline,
+            paymentTerms: editing.paymentTerms,
+            items: estimate.items.map((item, idx) => ({
+              description: item.description,
+              quantity: item.quantity,
+              unit: item.unit,
+              amount: calcLineItem(item).subtotal,
+            })),
+            calc,
+            rates: {
+              overheadRate: estimate.overheadRate,
+              marginRate: estimate.marginRate,
+              taxRate: estimate.taxRate,
+            },
+          };
+          return (
+            <div className="mt-6 rounded-lg border bg-gray-100 p-6">
+              <p className="mb-4 text-center text-sm text-muted-foreground">
+                Preview - {template === 'modern' ? 'Modern' : 'Classic'} Template
+              </p>
+              {template === 'modern' ? (
+                <ModernTemplate data={templateData} />
+              ) : (
+                <ClassicTemplate data={templateData} />
+              )}
+            </div>
+          );
+        })()}
       </div>
     </main>
   );

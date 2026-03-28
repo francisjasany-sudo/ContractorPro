@@ -15,7 +15,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Also return list of distinct trades
-    const trades = [...new Set(templates.map((t) => t.trade))];
+    const trades = [...new Set(templates.map((t: any) => t.trade))];
 
     res.json({ templates, trades });
   } catch (error) {

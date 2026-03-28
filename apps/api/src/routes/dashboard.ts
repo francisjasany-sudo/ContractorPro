@@ -69,7 +69,7 @@ router.get('/', async (req: Request, res: Response) => {
         acceptedProposals,
         winRate,
       },
-      recentProjects: recentProjects.map((p) => ({
+      recentProjects: recentProjects.map((p: any) => ({
         id: p.id,
         name: p.name,
         clientName: p.clientName,
@@ -77,7 +77,7 @@ router.get('/', async (req: Request, res: Response) => {
         estimateCount: p.estimates.length,
         updatedAt: p.updatedAt,
       })),
-      pendingProposalsList: pendingProposalsList.map((p) => ({
+      pendingProposalsList: pendingProposalsList.map((p: any) => ({
         id: p.id,
         status: p.status,
         projectName: p.estimate.project.name,

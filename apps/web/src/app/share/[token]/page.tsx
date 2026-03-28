@@ -6,7 +6,7 @@ import { calcEstimate, calcLineItem } from '@contractorpro/shared';
 import { ModernTemplate } from '@/components/templates';
 import type { ProposalData } from '@/components/templates';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 interface SharedProposal {
   id: string;

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx turbo build --filter=@contractorpro/web",
+  "buildCommand": "cd apps/web && npx prisma generate && cd ../.. && npx turbo build --filter=@contractorpro/web",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs"
 }

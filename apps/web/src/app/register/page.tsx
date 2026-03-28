@@ -33,7 +33,7 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem('token', data.token);
-      window.location.href = '/';
+      window.location.href = '/dashboard';
     } catch {
       setError('Network error. Please try again.');
     } finally {

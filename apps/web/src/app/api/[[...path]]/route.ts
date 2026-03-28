@@ -73,14 +73,28 @@ export async function GET(req: NextRequest) {
 
   // GET /api/dashboard
   if (pathname === '/api/dashboard') {
-    const [totalProjects, totalEstimates, recentProjects] = await Promise.all([
+    const [activeProjects, totalEstimates, recentProjects, proposals] = await Promise.all([
       db.project.count({ where: { userId: userId! } }),
       db.estimate.count({ where: { project: { userId: userId! } } }),
-      db.project.findMany({ where: { userId: userId! }, include: { estimates: true }, orderBy: { updatedAt: 'desc' }, take: 5 }),
+      db.project.findMany({ where: { userId: userId! }, include: { estimates: { include: { proposal: true } } }, orderBy: { updatedAt: 'desc' }, take: 5 }),
+      db.proposal.findMany({ where: { estimate: { project: { userId: userId! } } } }),
     ]);
-    return json({ totalProjects, totalEstimates, recentProjects: recentProjects.map((p: any) => ({
-      id: p.id, name: p.name, clientName: p.clientName, status: p.status, estimateCount: p.estimates.length, updatedAt: p.updatedAt,
-    })) });
+    const totalProposals = proposals.length;
+    const acceptedProposals = proposals.filter((p: any) => p.status === 'accepted').length;
+    const pendingProposals = proposals.filter((p: any) => p.status === 'draft' || p.status === 'sent').length;
+    return json({
+      stats: {
+        activeProjects,
+        pendingProposals,
+        totalProposals,
+        acceptedProposals,
+        winRate: totalProposals > 0 ? acceptedProposals / totalProposals : 0,
+      },
+      recentProjects: recentProjects.map((p: any) => ({
+        id: p.id, name: p.name, clientName: p.clientName, status: p.status, estimateCount: p.estimates.length, updatedAt: p.updatedAt,
+      })),
+      pendingProposalsList: [],
+    });
   }
 
   // GET /api/profile

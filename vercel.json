@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npx turbo build --filter=@contractorpro/web",
+  "buildCommand": "npx turbo build --filter=@contractorpro/web",
   "outputDirectory": "apps/web/.next",
-  "framework": "nextjs",
-  "installCommand": "npm install"
+  "framework": "nextjs"
 }
